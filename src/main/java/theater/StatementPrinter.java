@@ -37,32 +37,37 @@ public class StatementPrinter {
         StringBuilder result = new StringBuilder(
                 "Statement for " + invoice.getCustomer() + System.lineSeparator());
 
-        NumberFormat frmt = NumberFormat.getCurrencyInstance(Locale.US);
-
         for (Performance performance : invoice.getPerformances()) {
 
             int amount = getAmount(performance);
 
-            // add volume credits (now extracted)
+            // add volume credits
             volumeCredits += getVolumeCredits(performance);
 
             // print line for this order
             result.append(String.format("  %s: %s (%s seats)%n",
                     getPlay(performance).getName(),
-                    frmt.format(amount / Constants.PERCENT_FACTOR),
+                    usd(amount),
                     performance.getAudience()));
 
             totalAmount += amount;
         }
 
-        result.append(
-                String.format("Amount owed is %s%n",
-                        frmt.format(totalAmount / Constants.PERCENT_FACTOR)));
-
-        result.append(
-                String.format("You earned %s credits%n", volumeCredits));
+        result.append(String.format("Amount owed is %s%n", usd(totalAmount)));
+        result.append(String.format("You earned %s credits%n", volumeCredits));
 
         return result.toString();
+    }
+
+    /**
+     * Format an amount in USD currency.
+     *
+     * @param amount the amount in cents
+     * @return formatted USD currency string
+     */
+    private String usd(int amount) {
+        NumberFormat formatter = NumberFormat.getCurrencyInstance(Locale.US);
+        return formatter.format(amount / Constants.PERCENT_FACTOR);
     }
 
     /**
