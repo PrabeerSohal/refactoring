@@ -27,30 +27,24 @@ public class StatementPrinter {
      * Returns a formatted statement of the invoice.
      *
      * @return the formatted statement
-     * @throws RuntimeException if one of the play types is not known
      */
     public String statement() {
 
-        int totalAmount = 0;
-        int volumeCredits = 0;
+        int totalAmount = getTotalAmount();
+        int volumeCredits = getTotalVolumeCredits();
 
-        StringBuilder result = new StringBuilder(
-                "Statement for " + invoice.getCustomer() + System.lineSeparator());
+        StringBuilder result =
+                new StringBuilder("Statement for "
+                        + invoice.getCustomer()
+                        + System.lineSeparator());
 
         for (Performance performance : invoice.getPerformances()) {
-
-            int amount = getAmount(performance);
-
-            // add volume credits
-            volumeCredits += getVolumeCredits(performance);
-
-            // print line for this order
-            result.append(String.format("  %s: %s (%s seats)%n",
+            result.append(String.format(
+                    "  %s: %s (%s seats)%n",
                     getPlay(performance).getName(),
-                    usd(amount),
-                    performance.getAudience()));
-
-            totalAmount += amount;
+                    usd(getAmount(performance)),
+                    performance.getAudience()
+            ));
         }
 
         result.append(String.format("Amount owed is %s%n", usd(totalAmount)));
@@ -96,8 +90,7 @@ public class StatementPrinter {
                 result = Constants.TRAGEDY_BASE_AMOUNT;
                 if (performance.getAudience() > Constants.TRAGEDY_AUDIENCE_THRESHOLD) {
                     result += Constants.TRAGEDY_OVER_BASE_CAPACITY_PER_PERSON
-                            * (performance.getAudience()
-                            - Constants.TRAGEDY_AUDIENCE_THRESHOLD);
+                            * (performance.getAudience() - Constants.TRAGEDY_AUDIENCE_THRESHOLD);
                 }
                 break;
 
@@ -106,11 +99,9 @@ public class StatementPrinter {
                 if (performance.getAudience() > Constants.COMEDY_AUDIENCE_THRESHOLD) {
                     result += Constants.COMEDY_OVER_BASE_CAPACITY_AMOUNT
                             + Constants.COMEDY_OVER_BASE_CAPACITY_PER_PERSON
-                            * (performance.getAudience()
-                            - Constants.COMEDY_AUDIENCE_THRESHOLD);
+                            * (performance.getAudience() - Constants.COMEDY_AUDIENCE_THRESHOLD);
                 }
-                result += Constants.COMEDY_AMOUNT_PER_AUDIENCE
-                        * performance.getAudience();
+                result += Constants.COMEDY_AMOUNT_PER_AUDIENCE * performance.getAudience();
                 break;
 
             default:
@@ -130,12 +121,40 @@ public class StatementPrinter {
     private int getVolumeCredits(Performance performance) {
 
         int result = Math.max(
-                performance.getAudience() - Constants.BASE_VOLUME_CREDIT_THRESHOLD, 0);
+                performance.getAudience() - Constants.BASE_VOLUME_CREDIT_THRESHOLD,
+                0
+        );
 
         if ("comedy".equals(getPlay(performance).getType())) {
             result += performance.getAudience() / Constants.COMEDY_EXTRA_VOLUME_FACTOR;
         }
 
+        return result;
+    }
+
+    /**
+     * Compute the total volume credits for the invoice.
+     *
+     * @return the total volume credits
+     */
+    private int getTotalVolumeCredits() {
+        int result = 0;
+        for (Performance performance : invoice.getPerformances()) {
+            result += getVolumeCredits(performance);
+        }
+        return result;
+    }
+
+    /**
+     * Compute the total amount for the invoice.
+     *
+     * @return the total amount owed
+     */
+    private int getTotalAmount() {
+        int result = 0;
+        for (Performance performance : invoice.getPerformances()) {
+            result += getAmount(performance);
+        }
         return result;
     }
 }
