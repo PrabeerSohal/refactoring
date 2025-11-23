@@ -43,14 +43,8 @@ public class StatementPrinter {
 
             int amount = getAmount(performance);
 
-            // add volume credits
-            volumeCredits += Math.max(
-                    performance.getAudience() - Constants.BASE_VOLUME_CREDIT_THRESHOLD, 0);
-
-            if ("comedy".equals(getPlay(performance).getType())) {
-                volumeCredits += performance.getAudience()
-                        / Constants.COMEDY_EXTRA_VOLUME_FACTOR;
-            }
+            // add volume credits (now extracted)
+            volumeCredits += getVolumeCredits(performance);
 
             // print line for this order
             result.append(String.format("  %s: %s (%s seats)%n",
@@ -61,11 +55,12 @@ public class StatementPrinter {
             totalAmount += amount;
         }
 
-        result.append(String.format(
-                "Amount owed is %s%n",
-                frmt.format(totalAmount / Constants.PERCENT_FACTOR)));
-        result.append(String.format(
-                "You earned %s credits%n", volumeCredits));
+        result.append(
+                String.format("Amount owed is %s%n",
+                        frmt.format(totalAmount / Constants.PERCENT_FACTOR)));
+
+        result.append(
+                String.format("You earned %s credits%n", volumeCredits));
 
         return result.toString();
     }
@@ -85,7 +80,6 @@ public class StatementPrinter {
      *
      * @param performance the performance
      * @return the calculated amount
-     * @throws RuntimeException if the play type is unknown
      */
     private int getAmount(Performance performance) {
 
@@ -117,6 +111,24 @@ public class StatementPrinter {
             default:
                 throw new RuntimeException(
                         String.format("unknown type: %s", play.getType()));
+        }
+
+        return result;
+    }
+
+    /**
+     * Calculate the volume credits earned from a single performance.
+     *
+     * @param performance the performance
+     * @return the volume credits for this performance
+     */
+    private int getVolumeCredits(Performance performance) {
+
+        int result = Math.max(
+                performance.getAudience() - Constants.BASE_VOLUME_CREDIT_THRESHOLD, 0);
+
+        if ("comedy".equals(getPlay(performance).getType())) {
+            result += performance.getAudience() / Constants.COMEDY_EXTRA_VOLUME_FACTOR;
         }
 
         return result;
