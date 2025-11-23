@@ -30,10 +30,10 @@ public class StatementPrinter {
      */
     public String statement() {
 
-        int totalAmount = getTotalAmount();
-        int volumeCredits = getTotalVolumeCredits();
+        final int totalAmount = getTotalAmount();
+        final int volumeCredits = getTotalVolumeCredits();
 
-        StringBuilder result =
+        final StringBuilder result =
                 new StringBuilder("Statement for "
                         + invoice.getCustomer()
                         + System.lineSeparator());
@@ -60,7 +60,7 @@ public class StatementPrinter {
      * @return formatted USD currency string
      */
     private String usd(int amount) {
-        NumberFormat formatter = NumberFormat.getCurrencyInstance(Locale.US);
+        final NumberFormat formatter = NumberFormat.getCurrencyInstance(Locale.US);
         return formatter.format(amount / Constants.PERCENT_FACTOR);
     }
 
@@ -79,18 +79,20 @@ public class StatementPrinter {
      *
      * @param performance the performance
      * @return the calculated amount
+     * @throws RuntimeException if the play type is unknown
      */
     private int getAmount(Performance performance) {
 
-        Play play = getPlay(performance);
-        int result;
+        final Play play = getPlay(performance);
+        final int result;
 
         switch (play.getType()) {
             case "tragedy":
                 result = Constants.TRAGEDY_BASE_AMOUNT;
                 if (performance.getAudience() > Constants.TRAGEDY_AUDIENCE_THRESHOLD) {
                     result += Constants.TRAGEDY_OVER_BASE_CAPACITY_PER_PERSON
-                            * (performance.getAudience() - Constants.TRAGEDY_AUDIENCE_THRESHOLD);
+                            * (performance.getAudience()
+                            - Constants.TRAGEDY_AUDIENCE_THRESHOLD);
                 }
                 break;
 
@@ -99,9 +101,11 @@ public class StatementPrinter {
                 if (performance.getAudience() > Constants.COMEDY_AUDIENCE_THRESHOLD) {
                     result += Constants.COMEDY_OVER_BASE_CAPACITY_AMOUNT
                             + Constants.COMEDY_OVER_BASE_CAPACITY_PER_PERSON
-                            * (performance.getAudience() - Constants.COMEDY_AUDIENCE_THRESHOLD);
+                            * (performance.getAudience()
+                            - Constants.COMEDY_AUDIENCE_THRESHOLD);
                 }
-                result += Constants.COMEDY_AMOUNT_PER_AUDIENCE * performance.getAudience();
+                result += Constants.COMEDY_AMOUNT_PER_AUDIENCE
+                        * performance.getAudience();
                 break;
 
             default:
