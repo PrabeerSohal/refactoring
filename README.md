@@ -215,7 +215,7 @@ Hover — don't click — and a popup will appear mentioning what the problem is
 
 ### **Important: Add, commit, and push your changes.**
 
-- [ ] When you are done, commit your work with **a commit message that includes the string `Task 1.1`**.
+- [x] When you are done, commit your work with **a commit message that includes the string `Task 1.1`**.
 
 > **Very Important:** we'll be looking for the string `Task 1.1` in your git log of commit messages in the MarkUs autotests!
 
